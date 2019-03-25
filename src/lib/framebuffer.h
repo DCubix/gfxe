@@ -7,6 +7,7 @@
 #include <vector>
 
 enum FrameBufferTarget {
+	DRFrameBuffer = GL_FRAMEBUFFER,
 	DrawFrameBuffer = GL_DRAW_FRAMEBUFFER,
 	ReadFrameBuffer = GL_READ_FRAMEBUFFER
 };
@@ -50,11 +51,11 @@ public:
 		u32 depthSize = 24
 	);
 
-	void bind(
-		FrameBufferTarget target = FrameBufferTarget::DrawFrameBuffer,
+	FrameBuffer& bind(
+		FrameBufferTarget target = FrameBufferTarget::DRFrameBuffer,
 		Attachment readBuffer = Attachment::NoAttachment
 	);
-	void unbind(bool resetViewport = true);
+	FrameBuffer& unbind(bool resetViewport = true);
 
 	void drawBuffer(u32 index);
 	void resetDrawBuffers();

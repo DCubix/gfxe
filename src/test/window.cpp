@@ -37,7 +37,7 @@ static void APIENTRY MessageCallback(
 		default: break;
 	}
 
-	Print(lvl, "OpenGL (", src, " [", typ, "]): ", msg);
+	Print(lvl, "OpenGL ", src, " ", typ, ": ", msg);
 }
 
 Window::Window(GameAdapter *adapter, u32 width, u32 height) {

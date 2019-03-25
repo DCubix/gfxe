@@ -4,6 +4,7 @@
 #include "shader.h"
 #include "buffer.h"
 #include "texture.h"
+#include "framebuffer.h"
 
 #include "stb_image.h"
 
@@ -58,6 +59,9 @@ void main() {
 
 			stbi_image_free(data);
 		}
+
+		fbo.create(640, 480)
+			.color(TextureType::Texture2D, Format::RGB);
 	}
 
 	void onUpdate(Window* win, f32 dt) {
@@ -65,13 +69,22 @@ void main() {
 	}
 
 	void onDraw(Window* win) {
+		fbo.bind();
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		arr.bind();
 		tex.bind();
 		shader.bind();
 		shader.get("tex").set(i32(0));
-		arr.bind();
+
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		fbo.unbind();
+		fbo.bind(FrameBufferTarget::ReadFrameBuffer);
+		fbo.blit(0, 0, 640, 480, 0, 0, 640, 480, ClearBufferMask::ColorBuffer, TextureFilter::Nearest);
 	}
 
+	FrameBuffer fbo;
 	Texture tex;
 	Shader shader;
 	Buffer buf;

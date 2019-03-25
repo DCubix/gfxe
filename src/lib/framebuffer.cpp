@@ -1,8 +1,11 @@
 #include "framebuffer.h"
 
+#include <iostream>
+
 FrameBuffer::~FrameBuffer() {
 	if (m_id) {
 		glDeleteFramebuffers(1, &m_id);
+		std::cout << "DEL FRAMEBUFFER" << std::endl;
 		m_id = 0;
 	}
 	if (m_rboID) {
@@ -17,10 +20,6 @@ FrameBuffer& FrameBuffer::create(u32 width, u32 height, u32 depth) {
 	m_depth = depth;
 
 	glGenFramebuffers(1, &m_id);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return *this;
 }
@@ -61,7 +60,7 @@ FrameBuffer& FrameBuffer::color(
 		db.push_back(GL_COLOR_ATTACHMENT0 + i);
 	}
 
-	u32 atc = GL_COLOR_ATTACHMENT0 + att;
+	GLenum atc = GL_COLOR_ATTACHMENT0 + att;
 	switch (type) {
 		case TextureType::Texture1D:
 			glFramebufferTexture1D(GL_FRAMEBUFFER, atc, type, tex.id(), mip);
@@ -75,6 +74,9 @@ FrameBuffer& FrameBuffer::color(
 		case TextureType::Texture2DArray:
 			glFramebufferTextureLayer(GL_FRAMEBUFFER, atc, tex.id(), mip, layer);
 			break;
+		default:
+			glFramebufferTexture(GL_FRAMEBUFFER,  atc, tex.id(), mip);
+			break;
 	}
 
 	glDrawBuffers(db.size(), db.data());
@@ -84,7 +86,6 @@ FrameBuffer& FrameBuffer::color(
 	}
 
 	m_colorAttachments.push_back(tex);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return *this;
@@ -98,7 +99,7 @@ FrameBuffer& FrameBuffer::depth(u32 depthSize) {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
 	Texture tex{};
-	tex.create(TextureType::Texture2D, Format::Depth, m_width, m_height, 1, true, depthSize);
+	tex.create(TextureType::Texture2D, Format::Depth, m_width, m_height, 1, true, depthSize).bind();
 
 	glFramebufferTexture2D(
 			GL_FRAMEBUFFER,
@@ -107,9 +108,9 @@ FrameBuffer& FrameBuffer::depth(u32 depthSize) {
 			tex.id(),
 			0
 	);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	m_depthAttachment = tex;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return *this;
 }
@@ -118,10 +119,11 @@ FrameBuffer& FrameBuffer::stencil() {
 	if (m_stencilAttachment.id() != 0) {
 		return *this;
 	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
 	Texture tex{};
-	tex.create(TextureType::Texture2D, Format::R, m_width, m_height, 1, true);
+	tex.create(TextureType::Texture2D, Format::R, m_width, m_height, 1, true).bind();
 
 	glFramebufferTexture2D(
 			GL_FRAMEBUFFER,
@@ -131,9 +133,8 @@ FrameBuffer& FrameBuffer::stencil() {
 			0
 	);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	m_stencilAttachment = tex;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return *this;
 }
@@ -151,6 +152,7 @@ FrameBuffer& FrameBuffer::renderBuffer(
 	m_renderBufferStorage = storage;
 	GLenum ifmt = getInternalFormat(storage, floatingPoint, depthSize);
 	glGenRenderbuffers(1, &m_rboID);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rboID);
 	glRenderbufferStorage(GL_RENDERBUFFER, ifmt, m_width, m_height);
@@ -167,10 +169,11 @@ FrameBuffer& FrameBuffer::renderBuffer(
 		glDeleteRenderbuffers(1, &m_rboID);
 		m_rboID = 0;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		return *this;
 	}
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	return *this;
 }
 
@@ -196,16 +199,18 @@ void FrameBuffer::blit(
 	glBlitFramebuffer(sx0, sy0, sx1, sy1, dx0, dy0, dx1, dy1, mask, filter);
 }
 
-void FrameBuffer::bind(FrameBufferTarget target, Attachment readBuffer) {
+FrameBuffer& FrameBuffer::bind(FrameBufferTarget target, Attachment readBuffer) {
 	m_bound = target;
 	glGetIntegerv(GL_VIEWPORT, m_viewport);
 	glBindFramebuffer(target, m_id);
 	glViewport(0, 0, m_width, m_height);
-	if (target == FrameBufferTarget::ReadFrameBuffer)
+	if (target == FrameBufferTarget::ReadFrameBuffer) {
 		glReadBuffer(readBuffer);
+	}
+	return *this;
 }
 
-void FrameBuffer::unbind(bool resetViewport) {
+FrameBuffer& FrameBuffer::unbind(bool resetViewport) {
 	glBindFramebuffer(m_bound, 0);
 	if (resetViewport) {
 		glViewport(
@@ -215,4 +220,5 @@ void FrameBuffer::unbind(bool resetViewport) {
 			m_viewport[3]
 		);
 	}
+	return *this;
 }
