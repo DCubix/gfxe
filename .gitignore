@@ -1,5 +1,6 @@
 .exe/
 .vs/
+.vscode/ipch/
 [Bb]uild/
 [Oo]ut/
 [Dd]ebug/
@@ -12,3 +13,5 @@ x64/
 *.tuser
 *.sdf
 *.sln
+*.bin
+*.ipch
