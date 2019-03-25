@@ -50,7 +50,7 @@ void main() {
 		i32 w, h, comp;
 		u8* data = stbi_load("bricks.png", &w, &h, &comp, 4);
 		if (data) {
-			tex.create(Texture::Texture2D, Format::RGBA, w, h).bind()
+			tex.create(TextureType::Texture2D, Format::RGBA, w, h).bind()
 				.filter(TextureFilter::LinearMipMapLinear, TextureFilter::Linear)
 				.wrapMode(TextureWrap::Repeat, TextureWrap::Repeat)
 				.update(data, DataType::TypeUByte)

@@ -44,15 +44,16 @@ enum CubeMapSide {
 	NegativeZ = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
 };
 
+enum TextureType {
+	Texture1D = GL_TEXTURE_1D,
+	Texture2D = GL_TEXTURE_2D,
+	Texture2DArray = GL_TEXTURE_2D_ARRAY,
+	Texture3D = GL_TEXTURE_3D,
+	CubeMap = GL_TEXTURE_CUBE_MAP
+};
+
 class Texture {
 public:
-	enum TextureType {
-		Texture1D = GL_TEXTURE_1D,
-		Texture2D = GL_TEXTURE_2D,
-		Texture2DArray = GL_TEXTURE_2D_ARRAY,
-		Texture3D = GL_TEXTURE_3D,
-		CubeMap = GL_TEXTURE_CUBE_MAP
-	};
 
 	Texture() = default;
 	~Texture();
@@ -70,7 +71,7 @@ public:
 	Texture& array(u32 layerCount);
 
 	Texture& updateCube(const u8* data, CubeMapSide side, DataType dataType = DataType::TypeUByte);
-	Texture& updateArray(const std::vector<u8>& data, DataType dataType = DataType::TypeUByte);
+	Texture& updateArray(const u8* data, DataType dataType = DataType::TypeUByte);
 	Texture& update(const u8* data, DataType dataType);
 
 	Texture& generateMipmaps();
@@ -84,6 +85,8 @@ public:
 	u32 height() const { return m_height; }
 	u32 depth() const { return m_depth; }
 	u32 layerCount() const { return m_layerCount; }
+	TextureType type() const { return m_type; }
+	Format format() const { return m_format; }
 
 private:
 	GLuint m_id{ 0 };
@@ -95,8 +98,27 @@ private:
 	u32 m_layerCount{ 0 };
 
 	u32 m_width{ 0 }, m_height{ 0 }, m_depth{ 1 };
-
-	GLenum getInternalFormat(Format format, bool floatingPoint = false, u32 depthSize = 24);
 };
+
+inline static GLenum getInternalFormat(Format format, bool floatingPoint = false, u32 depthSize = 24) {
+	switch (format) {
+		case Format::R: return floatingPoint ? GL_R16F : GL_R8;
+		case Format::RG: return floatingPoint ? GL_RG16F : GL_RG8;
+		case Format::BGR:
+		case Format::RGB: return floatingPoint ? GL_RGB16F : GL_RGB8;
+		case Format::BGRA:
+		case Format::RGBA: return floatingPoint ? GL_RGBA16F : GL_RGBA8;
+		case Format::Depth: {
+			switch (depthSize) {
+				case 16: return GL_DEPTH_COMPONENT16;
+				case 24: return GL_DEPTH_COMPONENT24;
+				case 32: return floatingPoint ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
+				default: return GL_DEPTH_COMPONENT24;
+			}
+		}
+		case Format::DepthStencil: return floatingPoint ? GL_DEPTH32F_STENCIL8 : GL_DEPTH24_STENCIL8;
+		default: return 0;
+	}
+}
 
 #endif // GFXE_TEXTURE_H

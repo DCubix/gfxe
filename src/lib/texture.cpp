@@ -58,7 +58,7 @@ Texture& Texture::updateCube(const u8* data, CubeMapSide side, DataType dataType
 	return *this;
 }
 
-Texture& Texture::updateArray(const std::vector<u8>& data, DataType dataType) {
+Texture& Texture::updateArray(const u8* data, DataType dataType) {
 	if (m_layerCount > 0 && m_type == TextureType::Texture2DArray) {
 		glTexSubImage3D(
 			m_type,
@@ -66,10 +66,10 @@ Texture& Texture::updateArray(const std::vector<u8>& data, DataType dataType) {
 			m_width, m_height, m_layerCount,
 			m_format,
 			dataType,
-			data.data()
+			data
 		);
 	} else {
-		return update(data.data(), dataType);
+		return update(data, dataType);
 	}
 	return *this;
 }
@@ -105,25 +105,4 @@ Texture& Texture::bind(u32 slot) {
 Texture& Texture::unbind() {
 	glBindTexture(m_type, 0);
 	return *this;
-}
-
-GLenum Texture::getInternalFormat(Format format, bool floatingPoint, u32 depthSize) {
-	switch (format) {
-		case Format::R: return floatingPoint ? GL_R16F : GL_R8;
-		case Format::RG: return floatingPoint ? GL_RG16F : GL_RG8;
-		case Format::BGR:
-		case Format::RGB: return floatingPoint ? GL_RGB16F : GL_RGB8;
-		case Format::BGRA:
-		case Format::RGBA: return floatingPoint ? GL_RGBA16F : GL_RGBA8;
-		case Format::Depth: {
-			switch (depthSize) {
-				case 16: return GL_DEPTH_COMPONENT16;
-				case 24: return GL_DEPTH_COMPONENT24;
-				case 32: return floatingPoint ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
-				default: return GL_DEPTH_COMPONENT24;
-			}
-		}
-		case Format::DepthStencil: return floatingPoint ? GL_DEPTH32F_STENCIL8 : GL_DEPTH24_STENCIL8;
-		default: return 0;
-	}
 }
