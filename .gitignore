@@ -1,0 +1,14 @@
+.exe/
+.vs/
+[Bb]uild/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+x86/
+x64/
+*.exe
+*.a
+*.user
+*.tuser
+*.sdf
+*.sln
