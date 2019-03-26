@@ -56,7 +56,7 @@ class Texture {
 public:
 
 	Texture() = default;
-	~Texture();
+	~Texture() = default;
 
 	Texture& create(
 		TextureType type,
@@ -64,6 +64,8 @@ public:
 		u32 width, u32 height, u32 depth = 1,
 		bool floatingPoint = false, u32 depthSize = 24
 	);
+
+	void destroy();
 
 	Texture& wrapMode(TextureWrap s, TextureWrap t, TextureWrap r = TextureWrap::WrapNone);
 	Texture& filter(TextureFilter min, TextureFilter mag);

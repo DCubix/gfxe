@@ -36,10 +36,11 @@ public:
 	using ShaderMap = std::unordered_map<ShaderType, GLuint>;
 	using ValueMap = std::unordered_map<std::string, GLuint>;
 
-	Shader();
-	~Shader();
+	Shader() = default;
+	~Shader() = default;
 
 	Shader& create();
+	void destroy();
 
 	Shader& bind();
 	Shader& unbind();

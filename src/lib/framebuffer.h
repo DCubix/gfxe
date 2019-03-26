@@ -29,9 +29,10 @@ enum ClearBufferMask {
 class FrameBuffer {
 public:
 	FrameBuffer() = default;
-	~FrameBuffer();
+	~FrameBuffer() = default;
 
 	FrameBuffer& create(u32 width, u32 height, u32 depth = 1);
+	void destroy();
 
 	FrameBuffer& color(
 		TextureType type, Format format,
@@ -66,6 +67,12 @@ public:
 		ClearBufferMask mask,
 		TextureFilter filter
 	);
+
+	GLuint id() const { return m_id; }
+
+	u32 width() const { return m_width; }
+	u32 height() const { return m_height; }
+	u32 depth() const { return m_depth; }
 
 private:
 	struct SavedColorAttachment {

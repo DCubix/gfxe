@@ -1,6 +1,6 @@
 #include "texture.h"
 
-Texture::~Texture() {
+void Texture::destroy() {
 	if (m_id) {
 		glDeleteTextures(1, &m_id);
 		m_id = 0;

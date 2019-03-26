@@ -69,7 +69,7 @@ void main() {
 	}
 
 	void onDraw(Window* win) {
-		fbo.bind();
+		fbo.bind(FrameBufferTarget::DrawFrameBuffer);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		arr.bind();
@@ -79,9 +79,12 @@ void main() {
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		fbo.unbind();
-		fbo.bind(FrameBufferTarget::ReadFrameBuffer);
+		fbo.bind(FrameBufferTarget::ReadFrameBuffer, Attachment::ColorAttachment);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
 		fbo.blit(0, 0, 640, 480, 0, 0, 640, 480, ClearBufferMask::ColorBuffer, TextureFilter::Nearest);
+
+		fbo.unbind();
 	}
 
 	FrameBuffer fbo;

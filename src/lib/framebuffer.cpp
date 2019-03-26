@@ -2,10 +2,9 @@
 
 #include <iostream>
 
-FrameBuffer::~FrameBuffer() {
+void FrameBuffer::destroy() {
 	if (m_id) {
 		glDeleteFramebuffers(1, &m_id);
-		std::cout << "DEL FRAMEBUFFER" << std::endl;
 		m_id = 0;
 	}
 	if (m_rboID) {
@@ -33,7 +32,9 @@ FrameBuffer& FrameBuffer::color(
 
 	DataType dt = floatingPoint ? DataType::TypeFloat : DataType::TypeUByte;
 	Texture tex{};
-	tex.create(type, format, m_width, m_height, m_depth, floatingPoint, depthSize).bind();
+	tex.create(type, format, m_width, m_height, m_depth, floatingPoint, depthSize).bind()
+		.wrapMode(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge)
+		.filter(TextureFilter::LinearMipMapLinear, TextureFilter::Linear);
 	if (type == TextureType::CubeMap) {
 		tex.updateCube(nullptr, CubeMapSide::NegativeX, dt);
 		tex.updateCube(nullptr, CubeMapSide::NegativeY, dt);
@@ -99,7 +100,9 @@ FrameBuffer& FrameBuffer::depth(u32 depthSize) {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
 	Texture tex{};
-	tex.create(TextureType::Texture2D, Format::Depth, m_width, m_height, 1, true, depthSize).bind();
+	tex.create(TextureType::Texture2D, Format::Depth, m_width, m_height, 1, true, depthSize).bind()
+		.wrapMode(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge)
+		.filter(TextureFilter::Nearest, TextureFilter::Nearest);
 
 	glFramebufferTexture2D(
 			GL_FRAMEBUFFER,
@@ -123,7 +126,9 @@ FrameBuffer& FrameBuffer::stencil() {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
 	Texture tex{};
-	tex.create(TextureType::Texture2D, Format::R, m_width, m_height, 1, true).bind();
+	tex.create(TextureType::Texture2D, Format::R, m_width, m_height, 1, true).bind()
+		.wrapMode(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge)
+		.filter(TextureFilter::Nearest, TextureFilter::Nearest);
 
 	glFramebufferTexture2D(
 			GL_FRAMEBUFFER,

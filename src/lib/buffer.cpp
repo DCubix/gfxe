@@ -2,10 +2,9 @@
 
 #include <iostream>
 
-Buffer::~Buffer() {
+void Buffer::destroy() {
 	if (m_id) {
 		glDeleteBuffers(1, &m_id);
-		std::cout << "DEL BUFFER" << std::endl;
 		m_id = 0;
 	}
 }

@@ -3,10 +3,7 @@
 #include <vector>
 #include <iostream>
 
-Shader::Shader() {
-}
-
-Shader::~Shader() {
+void Shader::destroy() {
 	if (m_id) {
 		unbind();
 		glDeleteProgram(m_id);

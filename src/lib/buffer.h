@@ -37,9 +37,10 @@ public:
 	};
 
 	Buffer() = default;
-	~Buffer();
+	~Buffer() = default;
 
 	Buffer& create(BufferType type);
+	void destroy();
 
 	Buffer& bind();
 	Buffer& unbind();
